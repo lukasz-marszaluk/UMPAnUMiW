@@ -6,10 +6,7 @@
 
 int take_photo ()
 {
-    image *win = new image ();
-
-    std::cout << "Hello world from Windows fake lib!\t";
-    win->hello_world();
-    delete win;
-    return 0;
+    image not_used;
+    std::cout << "Yup from Windows!\n";
+    return -1;
 }

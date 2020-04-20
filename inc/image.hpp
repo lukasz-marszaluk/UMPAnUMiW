@@ -1,28 +1,42 @@
 #ifndef _IMAGE_
 #define _IMAGE_
 
+#include <string>
+
 enum result
 {
     OK,
     STBI_ERROR,
     MALLOC_FAULT,
     UNDEFINED,
-    WRONG_DATA_TYPE
+    UNSUPPORTED_FORMAT
 };
 
 class image
 {
-private:
+public:
     result last_result;
     int width;
     int height;
-    unsigned char data[];
+
+private:
+    unsigned char *data;
 
 public:
-    image(/* args */);
+    image(int _width, int _height);
+    image(std::string filename);
+    image();
     ~image();
 
-    int hello_world ();
+    unsigned char get_pixel(int x, int y, int c);
+    unsigned char get_pixel(int x, int y);
+    unsigned char get_pixel(int index);
+
+    void set_pixel(int x, int y, int c, unsigned char value);
+    void set_pixel(int x, int y, unsigned char r, unsigned char b, unsigned char g);
+
+    void save (std::string filename);
+    void draw_text ();
 };
 
 #endif // _IMAGE_

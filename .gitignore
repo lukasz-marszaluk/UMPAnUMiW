@@ -9,14 +9,6 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
-build/document_scanner.exe
-build/libapi_lib.a
-build/libcamera_library.a
-build/libimage_lib.a
-build/.cmake/api/v1/query/client-vscode/query.json
-build/.cmake/api/v1/reply/cache-v2-7d6732a95b3914c78a7e.json
-build/.cmake/api/v1/reply/codemodel-v2-875d66eb8021c7182da4.json
-build/.cmake/api/v1/reply/index-2020-04-12T11-36-27-0597.json
-build/.cmake/api/v1/reply/target-api_lib-Release-f571c74f492066f2f17a.json
-build/.cmake/api/v1/reply/target-document_scanner-Release-3b27659fd8f942ce587d.json
-build/.cmake/api/v1/reply/target-image_lib-Release-a16d4e44b4367dee34bd.json
+build
+.vscode
+test
