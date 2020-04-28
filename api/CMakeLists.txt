@@ -5,10 +5,8 @@ project(camera_api)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-if(MSVC)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif()
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+set(CMAKE_BUILD_TYPE Debug)
 
 # ======================================================== #
 set(INCLUDE ../inc) # directories
