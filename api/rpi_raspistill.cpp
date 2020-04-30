@@ -1,12 +1,12 @@
 #include "camera_api.hpp"
 
-#include "../inc/image.hpp"
-
-#include <iostream>
-
-int take_photo ()
+image take_photo ()
 {
-    image not_used;
-    std::cout << "Hello from Linux\n";
-    return -1;
+	system ("sudo raspistill -o photo.jpg -e");
+
+	image photo("photo.jpg");
+
+	system("sudo rm photo.jpg");	
+
+	return photo;
 }
