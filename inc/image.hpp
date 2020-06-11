@@ -23,7 +23,8 @@ private:
 
 public:
     image(int _width, int _height);
-    image(std::string filename);
+    image(std::string &filename);
+    image(image * img);
     image();
     ~image();
 
@@ -37,7 +38,9 @@ public:
     void save (std::string filename);
 
     void canny_edge_detection ();
-    void global_threshold (unsigned char threshold);
+    void gaussian_blur ();
+    void threshold_image (unsigned char threshold);
+    void double_threshold_image (unsigned char lower_threshold, unsigned char higher_threshold);
     int* get_histogram ();
     void apply_lookup_tables (unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut);
 };
