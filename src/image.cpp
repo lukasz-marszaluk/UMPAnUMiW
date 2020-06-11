@@ -3,6 +3,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 
+#define NDEBUG // comment that line to enable asserts
+
 #include "../third_party/stb_image.h"
 #include "../third_party/stb_image_write.h"
 
@@ -14,6 +16,8 @@ image::image(int _width, int _height)
     last_result = UNDEFINED;
     width = _width;
     height = _height;
+
+    data = NULL;
     data = (unsigned char *)stbi__malloc(width * height * 3);
 
     if (data != NULL)
@@ -25,6 +29,8 @@ image::image(std::string filename)
     int comp; // not used
 
     last_result = UNDEFINED;
+
+    data = NULL;
     data = stbi_load(filename.c_str(), &width, &height, &comp, 3);
 
     if (data != NULL)
@@ -46,6 +52,8 @@ image::~image()
 {
     if (data != NULL)
         stbi_image_free(data);
+
+    data = NULL;
 }
 
 unsigned char image::get_pixel(int x, int y, int c)

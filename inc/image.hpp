@@ -36,6 +36,10 @@ public:
     void set_pixel(int x, int y, unsigned char r, unsigned char b, unsigned char g);
 
     void save (std::string filename);
+
+    void canny_edge_detection ();
+    void global_threshold (unsigned char threshold);
+    
 };
 
 #endif // _IMAGE_

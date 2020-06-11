@@ -1,24 +1,35 @@
 #include "api/camera_api.hpp"
+
 #include "inc/image.hpp"
+#include "inc/document.hpp"
 
 #include <iostream>
 #include <stdlib.h>
 
 int main(int argc, char **argv)
 {
-    if (argc != 2)
-        return -1;
-	
-	std::cout << "Taking photo... (it could take a while)\n";
-    image test = take_photo();
-	std::cout << "Done.\n";
+    
+    std::string output_filename;
+    std::string input_filename;
+    
+    image photo;
+    document doc;
 
-    for (int yi = 0; yi < test.height; yi++)
-        for (int xi = 0; xi < test.width; xi++)
-            for (int ci = 0; ci < 3; ci++)
-                test.set_pixel(xi, yi, ci, test.get_pixel(xi, yi, ci));
+    bool read_photo_from_file;
 
-    test.save(argv[1]);
+    // recognize arguments
+    // print help
+
+    if (read_photo_from_file)
+        photo = image(input_filename);
+    else
+        photo = take_photo();
+
+
+
+    // recognize document inside photo
+    // cut out and stretch document
+    // imporove visibility
 
     return 0;
 }

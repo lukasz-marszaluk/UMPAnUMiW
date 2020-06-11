@@ -2,6 +2,6 @@
 
 image take_photo ()
 {
-    image fake();
+    image fake;
     return fake;
 }
