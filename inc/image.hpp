@@ -18,7 +18,6 @@ public:
     result last_result;
     int width;
     int height;
-
 private:
     unsigned char *data;
 
@@ -36,6 +35,11 @@ public:
     void set_pixel(int x, int y, unsigned char r, unsigned char b, unsigned char g);
 
     void save (std::string filename);
+
+    void canny_edge_detection ();
+    void global_threshold (unsigned char threshold);
+    int* get_histogram ();
+    void apply_lookup_tables (unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut);
 };
 
 #endif // _IMAGE_
