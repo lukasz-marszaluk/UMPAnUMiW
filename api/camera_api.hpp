@@ -3,6 +3,8 @@
     
 #include "../inc/image.hpp"
 
-image take_photo ();
+image* take_photo ();
+
+void delete_photo (image *photo);
 
 #endif // _CAMERA_API_
