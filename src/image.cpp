@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <cassert>
+#include <cmath>
 
 image::image(int _width, int _height)
 {
@@ -146,44 +147,100 @@ void image::save(std::string filename)
         last_result = STBI_ERROR;
 }
 
-int* image::get_histogram ()
+int *image::get_histogram()
 {
     int yi, xi;
-    int *histogram = new int [256];
+    int *histogram = new int[256];
 
     for (int i = 0; i < 256; i++)
-        histogram [i] = 0;
-    
+        histogram[i] = 0;
 
     for (yi = 0; yi < height; yi++)
         for (xi = 0; xi < width; xi++)
-            histogram [get_pixel(xi, yi)] += 1;
-        
+            histogram[get_pixel(xi, yi)] += 1;
+
     return histogram;
 }
 
-void image::canny_edge_detection ()
+void image::canny_edge_detection()
 {
-    int xi, yi;
-    unsigned char * grayscale_img = new unsigned char [width * height];
+    int xi, yi, xii, yii;
+    unsigned char *grayscale_img = new unsigned char[width * height];
 
+    // remove noise from image
     gaussian_blur();
 
+    // convert to grayscale
     for (yi = 0; yi < height; yi++)
         for (xi = 0; xi < width; xi++)
             grayscale_img[yi * width + xi] = get_pixel(xi, yi);
 
-    delete [] grayscale_img;
+    // calculate gradient
+    int grad_x, grad_y;
+    int *gradient_value = new int[width * height];
+    double *gradient_direction = new double[width * height];
+
+    memset(gradient_value, 0, sizeof(int));
+    memset(gradient_direction, 0, sizeof(double));
+
+    int convolution_mask_x[] = {
+        -1, 0, 1,
+        -2, 0, 2,
+        -1, 0, 2};
+
+    int convolution_mask_y[] = {
+        -1, -2, -1,
+        0, 0, 0,
+        1, 2, 1};
+
+    for (yi = 1; yi < height - 1; yi++)
+    {
+        for (xi = 1; xi < width - 1; xi++)
+        {
+            grad_x = 0;
+            grad_y = 0;
+
+            for (yii = 0; yii < 3; yii++)
+            {
+                for (xii = 0; xii < 3; xii++)
+                {
+                    grad_y +=
+                        grayscale_img[(yi + yii - 1) * width + (xi + xii - 1)] *
+                        convolution_mask_y[yii * width + xi];
+
+                    grad_x +=
+                        grayscale_img[(yi + yii - 1) * width + (xi + xii - 1)] *
+                        convolution_mask_x[yii * width + xi];
+                }
+            }
+
+            gradient_value[yi * width + xi] = sqrt(grad_x * grad_x + grad_y * grad_y);
+            gradient_direction[yi * width + xi] = atan((double)grad_y / grad_x);
+        }
+    }
+
+    for (yi = 0; yi < height; yi++)
+    {
+        for (xi = 0; xi < width; xi++)
+        {
+            set_pixel(xi, yi, 0, (unsigned char)(gradient_value[yi * width + xi] / 100));
+            set_pixel(xi, yi, 1, (unsigned char)(gradient_value[yi * width + xi] / 100));
+            set_pixel(xi, yi, 2, (unsigned char)(gradient_value[yi * width + xi] / 100));
+        }
+    }
+
+    delete[] gradient_direction;
+    delete[] gradient_value;
+    delete[] grayscale_img;
 }
 
-void image::gaussian_blur ()
+void image::gaussian_blur()
 {
     int xi, yi, ci, xii, yii;
     double pixel;
     image *temp_img = new image(this);
-    
-    double gaussian_kernel[5] = {0.117647059, 0.235294118, 0.294117647, 0.235294118, 0.117647059};
 
+    double gaussian_kernel[5] = {0.117647059, 0.235294118, 0.294117647, 0.235294118, 0.117647059};
 
     // apply filter in horizontal direction
     for (yi = 0; yi < height; yi++)
