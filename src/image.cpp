@@ -5,6 +5,8 @@
 
 #define NDEBUG // comment that line to enable asserts
 
+#include "../inc/common.hpp"
+
 #include "../third_party/stb_image.h"
 #include "../third_party/stb_image_write.h"
 
@@ -132,13 +134,13 @@ void image::save(std::string filename)
 
     ext = filename.substr(filename.find_last_of('.', filename.length()));
 
-    if (ext.compare(".png"))
+    if (ext.compare(".png") == 0)
         result = stbi_write_png(filename.c_str(), width, height, 3, data, 0);
-    else if (ext.compare(".bmp"))
+    else if (ext.compare(".bmp") == 0)
         result = stbi_write_bmp(filename.c_str(), width, height, 3, data);
-    else if (ext.compare(".jpg"))
+    else if (ext.compare(".jpg") == 0)
         result = stbi_write_jpg(filename.c_str(), width, height, 3, data, 95);
-    else if (ext.compare(".tga"))
+    else if (ext.compare(".tga") == 0)
         result = stbi_write_tga(filename.c_str(), width, height, 3, data);
     else
         last_result = UNSUPPORTED_FORMAT;
@@ -178,10 +180,10 @@ void image::canny_edge_detection()
     // calculate gradient
     int grad_x, grad_y;
     int *gradient_value = new int[width * height];
-    double *gradient_direction = new double[width * height];
+    int *gradient_direction = new int[width * height];
 
     memset(gradient_value, 0, sizeof(int));
-    memset(gradient_direction, 0, sizeof(double));
+    memset(gradient_direction, 0, sizeof(int));
 
     int convolution_mask_x[] = {
         -1, 0, 1,
@@ -205,17 +207,42 @@ void image::canny_edge_detection()
                 for (xii = 0; xii < 3; xii++)
                 {
                     grad_y +=
-                        grayscale_img[(yi + yii - 1) * width + (xi + xii - 1)] *
-                        convolution_mask_y[yii * width + xi];
+                        convolution_mask_y[yii * 3 + xii] * grayscale_img[(yi + yii - 1) * width + (xi + xii - 1)];
 
                     grad_x +=
-                        grayscale_img[(yi + yii - 1) * width + (xi + xii - 1)] *
-                        convolution_mask_x[yii * width + xi];
+                        convolution_mask_x[yii * 3 + xii] * grayscale_img[(yi + yii - 1) * width + (xi + xii - 1)];
                 }
             }
 
             gradient_value[yi * width + xi] = sqrt(grad_x * grad_x + grad_y * grad_y);
-            gradient_direction[yi * width + xi] = atan((double)grad_y / grad_x);
+            gradient_direction[yi * width + xi] = round_angle_45 (atan((double)grad_y / grad_x) * 180.0 / M_PI);
+        }
+    }
+
+    // non_max suppression
+    for (yi = 1; yi < height - 1; yi++)
+    {
+        for (xi = 1; xi < width - 1; xi++)
+        {
+            switch (gradient_direction[yi * width + xi])
+            {
+            case 0:
+                if (gradient_value[yi * width + xi] < gradient_value[yi * width + xi + 1] || gradient_value[yi * width + xi] < gradient_value[yi * width + xi - 1])
+                    gradient_value[yi * width + xi] = 0;
+                break;
+            case 45:
+                if (gradient_value[yi * width + xi] < gradient_value[(yi + 1) * width + xi - 1] || gradient_value[yi * width + xi] < gradient_value[(yi - 1) * width + xi + 1])
+                    gradient_value[yi * width + xi] = 0;
+                break;
+            case 90:
+                if (gradient_value[yi * width + xi] < gradient_value[(yi + 1) * width + xi] || gradient_value[yi * width + xi] < gradient_value[(yi - 1) * width + xi])
+                    gradient_value[yi * width + xi] = 0;
+                break;
+            case 135:
+                if (gradient_value[yi * width + xi] < gradient_value[(yi - 1) * width + xi + -1] || gradient_value[yi * width + xi] < gradient_value[(yi + 1) * width + xi + 1])
+                    gradient_value[yi * width + xi] = 0;
+                break;
+            }
         }
     }
 
@@ -223,9 +250,9 @@ void image::canny_edge_detection()
     {
         for (xi = 0; xi < width; xi++)
         {
-            set_pixel(xi, yi, 0, (unsigned char)(gradient_value[yi * width + xi] / 100));
-            set_pixel(xi, yi, 1, (unsigned char)(gradient_value[yi * width + xi] / 100));
-            set_pixel(xi, yi, 2, (unsigned char)(gradient_value[yi * width + xi] / 100));
+            set_pixel(xi, yi, 0, (unsigned char)(gradient_value[yi * width + xi] >> 2));
+            set_pixel(xi, yi, 1, (unsigned char)(gradient_value[yi * width + xi] >> 2));
+            set_pixel(xi, yi, 2, (unsigned char)(gradient_value[yi * width + xi] >> 2));
         }
     }
 

@@ -8,7 +8,6 @@
 
 int main(int argc, char **argv)
 {
-    
     std::string input_filename = argv[1];
     std::string output_filename = argv[2];
     
@@ -26,7 +25,7 @@ int main(int argc, char **argv)
         photo = take_photo();
 
 
-    photo->gaussian_blur();
+    photo->canny_edge_detection();
     photo->save(output_filename);
 
     // recognize document inside photo

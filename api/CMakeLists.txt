@@ -10,7 +10,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 # ======================================================== #
 set(INCLUDE ../inc) # directories
-set(SOURCE ../src/image.cpp) # files
+set(SOURCE ../src/image.cpp ../src/common.cpp) # files
 
 # ======================================================== #
 include(GenerateExportHeader)
