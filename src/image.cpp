@@ -189,7 +189,7 @@ void image::canny_edge_detection()
     int convolution_mask_x[] = {
         -1, 0, 1,
         -2, 0, 2,
-        -1, 0, 2};
+        -1, 0, 1};
 
     int convolution_mask_y[] = {
         -1, -2, -1,
