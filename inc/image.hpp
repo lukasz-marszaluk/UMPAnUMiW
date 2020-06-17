@@ -45,4 +45,26 @@ public:
     void apply_lookup_tables (unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut);
 };
 
+class grayscale_image
+{
+public:
+    result last_result;
+    int width;
+    int height;
+private:
+    unsigned char *data;
+
+public:
+    grayscale_image(image *img);
+    grayscale_image(grayscale_image *img);
+    ~grayscale_image();
+
+    unsigned char get_pixel(int x, int y);
+    unsigned char get_pixel(int index);
+    void set_pixel(int x, int y, unsigned char value);
+
+    void gaussian_blur ();
+    void canny_edge_detection ();
+};
+
 #endif // _IMAGE_

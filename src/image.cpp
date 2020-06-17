@@ -358,3 +358,107 @@ void image::gaussian_blur()
 
     delete temp_img;
 }
+
+grayscale_image::grayscale_image(image *img)
+{
+    last_result = UNDEFINED;
+
+    width = img->width;
+    height = img->height;
+
+    data = NULL;
+    data = (unsigned char *)stbi__malloc(width * height);
+
+    if (data != NULL)
+        last_result = OK;
+
+    int yi, xi;
+
+    for (yi = 0; yi < height; yi++)
+        for (xi = 0; xi < width; xi++)
+            data[yi * width + xi] = img->get_pixel(xi, yi);
+}
+
+grayscale_image::grayscale_image(grayscale_image *img)
+{
+    last_result = UNDEFINED;
+
+    if (img->last_result != OK)
+        return;
+
+    width = img->width;
+    height = img->height;
+
+    data = NULL;
+    data = (unsigned char *)stbi__malloc(width * height);
+
+    if (data != NULL)
+        last_result = OK;
+    else
+        return;
+
+    memcpy(data, img->data, width * height);
+    last_result = img->last_result;
+}
+
+grayscale_image::~grayscale_image()
+{
+    if (data != NULL)
+        stbi_image_free(data);
+
+    data = NULL;
+}
+
+unsigned char grayscale_image::get_pixel(int x, int y)
+{
+    return data[y * width + x];
+}
+
+unsigned char grayscale_image::get_pixel(int index)
+{
+    return data[index];
+}
+
+void grayscale_image::set_pixel(int x, int y, unsigned char value)
+{
+    data[y * width + x] = value;
+}
+
+void grayscale_image::gaussian_blur()
+{
+    int xi, yi, xii, yii;
+    double pixel;
+    grayscale_image *temp_img = new grayscale_image(this);
+
+    double gaussian_kernel[5] = {0.117647059, 0.235294118, 0.294117647, 0.235294118, 0.117647059};
+
+    // apply filter in horizontal direction
+    for (yi = 0; yi < height; yi++)
+    {
+        for (xi = 2; xi < width - 2; xi++)
+        {
+            pixel = 0.0;
+
+            for (xii = 0; xii < 5; xii++)
+                pixel += gaussian_kernel[xii] * get_pixel(xi + xii - 2, yi);
+
+            temp_img->set_pixel(xi, yi, (unsigned char)pixel);
+        }
+    }
+
+    // apply filter in horizontal direction
+    for (yi = 2; yi < height - 2; yi++)
+    {
+        for (xi = 0; xi < width; xi++)
+        {
+            pixel = 0.0;
+
+            for (yii = 0; yii < 5; yii++)
+                pixel += gaussian_kernel[yii] * temp_img->get_pixel(xi, yi + yii - 2);
+
+            set_pixel(xi, yi, (unsigned char)pixel);
+        }
+    }
+
+    delete temp_img;
+}

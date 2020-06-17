@@ -15,3 +15,4 @@ test
 document_scanner
 libcamera_api.so
 api/camera_api_export.h
+.vs
