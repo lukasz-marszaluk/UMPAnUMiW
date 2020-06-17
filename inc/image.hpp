@@ -40,9 +40,9 @@ public:
 
     void save (std::string filename);
 
-    void threshold_image (unsigned char threshold);
-    int* get_histogram ();
-    void apply_lookup_tables (unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut);
+    void threshold_image (unsigned char threshold); // TODO
+    int* get_histogram (); // TODO
+    void apply_lookup_tables (unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut); // TODO
 };
 
 class grayscale_image

@@ -64,7 +64,7 @@ image::image(image *img)
     last_result = img->last_result;
 }
 
-image::image (grayscale_image *img)
+image::image(grayscale_image *img)
 {
     int yi, xi;
     unsigned char pixel;
@@ -284,7 +284,7 @@ void grayscale_image::gaussian_blur()
 
     delete temp_img;
 }
-void grayscale_image::canny_edge_detection ()
+void grayscale_image::canny_edge_detection()
 {
     int xi, yi, xii, yii, i;
 
@@ -321,9 +321,8 @@ void grayscale_image::canny_edge_detection ()
             {
                 for (xii = 0; xii < 3; xii++)
                 {
-                    grad_x += convolution_mask_x[yii * 3 + xii] * 
-                        get_pixel(xi + xii - 1, yi + yii - 1);
-                              
+                    grad_x += convolution_mask_x[yii * 3 + xii] *
+                              get_pixel(xi + xii - 1, yi + yii - 1);
 
                     grad_y += convolution_mask_y[yii * 3 + xii] *
                               get_pixel(xi + xii - 1, yi + yii - 1);
@@ -417,4 +416,41 @@ void grayscale_image::canny_edge_detection ()
 
     delete[] gradient_direction;
     delete[] gradient_value;
+}
+
+void image::transform_image(point *new_corners)
+{
+    int new_width, new_height;
+    int temp;
+
+    // TODO: check order of points -> must be:
+    // top-left, top-right, bottom-left, bottom-right
+
+    new_width = new_corners[1].x - new_corners[0].x;
+    temp = new_corners[3].x - new_corners[2].x;
+
+    if (new_width > temp)
+        new_width = temp;
+
+    new_height = new_corners[2].y - new_corners[0].y;
+    temp = new_corners[3].y - new_corners[1].y;
+
+    if (new_height > temp)
+        new_height = temp;
+
+    image *output = new image(new_width, new_height);
+
+
+    // TODO: transfor image ====================================================
+
+
+    // save output to this
+    width = output->width;
+    height = output->height;
+
+    stbi_image_free(data);
+    data = (unsigned char *)stbi__malloc(width * height * 3);
+    memcpy(data, output->data, width * height * 3);
+
+    delete output;
 }

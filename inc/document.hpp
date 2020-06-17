@@ -2,6 +2,7 @@
 #define _DOCUMENT_
 
 #include "image.hpp"
+#include "common.hpp"
 #include <vector>
 
 class detected_object
@@ -9,12 +10,6 @@ class detected_object
   char *data;
   int width;
   int height;
-};
-
-struct point 
-{
-  int x;
-  int y;
 };
 
 class document
