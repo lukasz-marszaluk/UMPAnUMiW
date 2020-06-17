@@ -12,6 +12,8 @@ enum result
     UNSUPPORTED_FORMAT
 };
 
+class grayscale_image;
+
 class image
 {
 public:
@@ -24,7 +26,8 @@ private:
 public:
     image(int _width, int _height);
     image(std::string &filename);
-    image(image * img);
+    image(image *img);
+    image(grayscale_image *img);
     image();
     ~image();
 
@@ -37,10 +40,7 @@ public:
 
     void save (std::string filename);
 
-    void canny_edge_detection ();
-    void gaussian_blur ();
     void threshold_image (unsigned char threshold);
-    void double_threshold_image (unsigned char lower_threshold, unsigned char higher_threshold);
     int* get_histogram ();
     void apply_lookup_tables (unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut);
 };

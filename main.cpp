@@ -24,10 +24,14 @@ int main(int argc, char **argv)
     else
         photo = take_photo();
 
+    grayscale_image *bw_photo = new grayscale_image(photo);
 
-    photo->canny_edge_detection();
+    bw_photo->canny_edge_detection();
+
+    delete photo;
+    photo = new image(bw_photo);
     photo->save(output_filename);
-
+    delete photo;
     // recognize document inside photo
     // cut out and stretch document
     // imporove visibility
