@@ -11,30 +11,15 @@ int main(int argc, char **argv)
     std::string input_filename = argv[1];
     std::string output_filename = argv[2];
     
-    image *photo;
-    // document doc;
+    image *photo = new image(input_filename);
+    document *doc = new document(photo);
 
-    bool read_photo_from_file = 1;
-
-    // recognize arguments
-    // print help
-
-    if (read_photo_from_file)
-        photo = new image(input_filename);
-    else
-        photo = take_photo();
-
-    grayscale_image *bw_photo = new grayscale_image(photo);
-
-    bw_photo->canny_edge_detection();
+    doc->recognize_document();
 
     delete photo;
-    photo = new image(bw_photo);
+    photo = doc->get_document_image();
     photo->save(output_filename);
     delete photo;
-    // recognize document inside photo
-    // cut out and stretch document
-    // imporove visibility
 
     return 0;
 }
