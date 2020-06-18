@@ -10,6 +10,12 @@ private:
   char *data;
   int width;
   int height;
+  
+public:
+  detected_object(int _width, int _height); // todo
+  ~detected_object(); // todo
+
+  void toggle_cell (int x, int y); // todo
 };
 
 struct point 
@@ -27,21 +33,21 @@ private:
 
 public:
   void recognize_document ();
-  void stretch_document ();
-  void improve_colors ();
+  void stretch_document (); // todo
+  void improve_colors (); // todo
 
-  image get_document_image ();
+  image *get_document_image ();
 
   document(image *_img);
   ~document();
 
 private:
-  std::vector<detected_object*> separate_objects_on_image(grayscale_image *bw_img);
-  detected_object* find_biggest_object (std::vector<detected_object*> objects);
-  void object_to_interior_contour (detected_object *object);
-  void extract_document_corners (detected_object *contours);
+  std::vector<detected_object*> separate_objects_on_image(grayscale_image *image);
+  detected_object* find_biggest_object (std::vector<detected_object*> objects); // todo
+  void object_to_interior_contour (detected_object *object); // todo
+  void extract_document_corners (detected_object *contours); // todo
 
-  void get_pixel_shift (int x, int y, double &x_shift, double &y_shift);
+  void separate_object_on_image_recursive(detected_object *object, grayscale_image *image, int x, int y);
 };
 
 #endif //_DOCUMENT_

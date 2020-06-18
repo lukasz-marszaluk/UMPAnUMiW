@@ -34,9 +34,29 @@ void document::recognize_document ()
   delete document_outline;
 }
 
-std::vector<detected_object*> document::separate_objects_on_image(grayscale_image*)
+image *document::get_document_image()
 {
+  return img;
+}
 
+std::vector<detected_object *> document::separate_objects_on_image(grayscale_image *image)
+{
+  int xi, yi;
+  std::vector <detected_object *> objects;
+
+  for (yi = 0; yi < image->height; yi++)
+  {
+    for (xi = 0; xi < image->width; xi++)
+    {
+      if (image->get_pixel(xi, yi))
+      {
+        
+      }
+
+    }
+  }
+  
+  return objects;
 }
 
 detected_object* document::find_biggest_object (std::vector<detected_object*> objects)
@@ -52,4 +72,27 @@ void document::object_to_interior_contour (detected_object *object)
 void document::extract_document_corners (detected_object *contours)
 {
 
+}
+
+void document::separate_object_on_image_recursive(detected_object *object, grayscale_image *image, int x, int y)
+{
+  if (x < 0 || x >= image->width)
+    return;
+  if (y < 0 || y >= image->height)
+    return;
+
+  if (image->get_pixel(x, y) == 0)
+    return;
+
+  image->set_pixel (x, y, 0);
+  // set object value
+
+  separate_object_on_image_recursive (object, image, x - 1, y - 1);
+  separate_object_on_image_recursive (object, image, x, y - 1);
+  separate_object_on_image_recursive (object, image, x + 1, y - 1);
+  separate_object_on_image_recursive (object, image, x - 1, y);
+  separate_object_on_image_recursive (object, image, x + 1, y);
+  separate_object_on_image_recursive (object, image, x - 1, y + 1);
+  separate_object_on_image_recursive (object, image, x, y + 1);
+  separate_object_on_image_recursive (object, image, x + 1, y + 1);
 }
