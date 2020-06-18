@@ -489,3 +489,56 @@ point image::get_shift (int x, int y, point *shift)
 
     return result;
 }
+
+void image::apply_lookup_tables (unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut)
+{
+    int xi, yi;
+
+    for (yi = 0; yi < height; yi++)
+    {
+        for (xi = 0; xi < width; xi++)
+        {
+            set_pixel(xi, yi, 0, red_lut[get_pixel(xi, yi, 0)]);
+            set_pixel(xi, yi, 1, green_lut[get_pixel(xi, yi, 1)]);
+            set_pixel(xi, yi, 2, blue_lut[get_pixel(xi, yi, 2)]);
+        }
+    }
+}
+
+int* image::get_histogram (int channel)
+{
+    int xi, yi;
+    int *histogram = new int [256];
+
+    memset (histogram, 0, 256 * sizeof(int));
+
+    for (yi = 0; yi < height; yi++)
+        for (xi = 0; xi < width; xi++)
+            histogram[get_pixel(xi, yi, channel)] += 1;
+
+    return histogram;
+}
+
+void image::remove_tint ()
+{
+    int i;
+
+    int *hist_red = get_histogram (0);
+    int *hist_green = get_histogram (1);
+    int *hist_blue = get_histogram (2);
+
+    int difference_red_green = 0;
+    int difference_red_blue = 0;
+
+
+    for (i = 0; i < 256; i++)
+    {
+        difference_red_green += hist_red [i] - hist_green [i];
+        difference_red_blue += hist_red [i] - hist_blue [i];
+    }
+    
+
+    delete [] hist_red;
+    delete [] hist_green;
+    delete [] hist_blue;
+}
