@@ -64,7 +64,7 @@ image::image(image *img)
     last_result = img->last_result;
 }
 
-image::image (grayscale_image *img)
+image::image(grayscale_image *img)
 {
     int yi, xi;
     unsigned char pixel;
@@ -284,7 +284,7 @@ void grayscale_image::gaussian_blur()
 
     delete temp_img;
 }
-void grayscale_image::canny_edge_detection ()
+void grayscale_image::canny_edge_detection()
 {
     int xi, yi, xii, yii, i;
 
@@ -296,6 +296,7 @@ void grayscale_image::canny_edge_detection ()
     int *gradient_value = new int[width * height];
     int *gradient_direction = new int[width * height];
     int max_grad_value = 0;
+    int pixel;
 
     memset(gradient_value, 0, sizeof(int));
     memset(gradient_direction, 0, sizeof(int));
@@ -321,9 +322,8 @@ void grayscale_image::canny_edge_detection ()
             {
                 for (xii = 0; xii < 3; xii++)
                 {
-                    grad_x += convolution_mask_x[yii * 3 + xii] * 
-                        get_pixel(xi + xii - 1, yi + yii - 1);
-                              
+                    grad_x += convolution_mask_x[yii * 3 + xii] *
+                              get_pixel(xi + xii - 1, yi + yii - 1);
 
                     grad_y += convolution_mask_y[yii * 3 + xii] *
                               get_pixel(xi + xii - 1, yi + yii - 1);
@@ -382,15 +382,16 @@ void grayscale_image::canny_edge_detection ()
             gradient_value[i] = 127;
     }
 
-    // hysteresis
+    // hysteresis with output save
     for (yi = 1; yi < height - 1; yi++)
     {
         for (xi = 1; xi < width - 1; xi++)
         {
-            if (gradient_value[yi * width + xi] != 127)
-                continue;
-
-            if (
+            if (gradient_value[yi * width + xi] == 255)
+                set_pixel(xi, yi, 255);
+            else if (gradient_value[yi * width + xi] == 0)
+                set_pixel(xi, yi, 0);
+            else if (
                 (gradient_value[(yi - 1) * width + (xi - 1)] == 255) ||
                 (gradient_value[(yi - 1) * width + (xi + 0)] == 255) ||
                 (gradient_value[(yi - 1) * width + (xi + 1)] == 255) ||
@@ -399,19 +400,9 @@ void grayscale_image::canny_edge_detection ()
                 (gradient_value[(yi + 1) * width + (xi - 1)] == 255) ||
                 (gradient_value[(yi + 1) * width + (xi + 0)] == 255) ||
                 (gradient_value[(yi + 1) * width + (xi + 1)] == 255))
-
-                gradient_value[yi * width + xi] = 255;
+                set_pixel(xi, yi, 255);
             else
-                gradient_value[yi * width + xi] = 0;
-        }
-    }
-
-    // save output
-    for (yi = 0; yi < height; yi++)
-    {
-        for (xi = 0; xi < width; xi++)
-        {
-            set_pixel(xi, yi, (unsigned char)(gradient_value[yi * width + xi]));
+                set_pixel(xi, yi, 0);
         }
     }
 
