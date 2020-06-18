@@ -1,6 +1,8 @@
 #ifndef _IMAGE_
 #define _IMAGE_
 
+#include "common.hpp"
+
 #include <string>
 
 enum result
@@ -43,6 +45,10 @@ public:
     void threshold_image (unsigned char threshold); // TODO
     int* get_histogram (); // TODO
     void apply_lookup_tables (unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut); // TODO
+
+    void transform_image (point *new_corners);
+private:
+    point get_shift (int x, int y, point *shift);
 };
 
 class grayscale_image

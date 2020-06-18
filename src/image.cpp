@@ -420,12 +420,14 @@ void grayscale_image::canny_edge_detection()
 
 void image::transform_image(point *new_corners)
 {
+    int xi, yi, ci;
     int new_width, new_height;
     int temp;
 
     // TODO: check order of points -> must be:
     // top-left, top-right, bottom-left, bottom-right
 
+    // find smaller dimensions
     new_width = new_corners[1].x - new_corners[0].x;
     temp = new_corners[3].x - new_corners[2].x;
 
@@ -439,9 +441,20 @@ void image::transform_image(point *new_corners)
         new_height = temp;
 
     image *output = new image(new_width, new_height);
+    point shift;
 
 
-    // TODO: transfor image ====================================================
+    // proper transormation
+    for (yi = 0; yi < output->width; yi++)
+    {
+        for (xi = 0; xi < output->height; xi++)
+        {
+            shift = output->get_shift (xi, yi, new_corners);
+            
+            for (ci = 0; ci < 3; ci++)            
+                output->set_pixel(xi, yi, ci, get_pixel(xi, yi, ci));
+        }
+    }
 
 
     // save output to this
@@ -453,4 +466,15 @@ void image::transform_image(point *new_corners)
     memcpy(data, output->data, width * height * 3);
 
     delete output;
+}
+
+point image::get_shift (int x, int y, point *shift)
+{
+    double shift_on_top, shift_on_bottom;
+    point result;
+
+    // horizontal
+    shift_on_top = shift[0].x * (width - x) + shift[1].x * x;
+
+
 }
