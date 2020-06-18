@@ -46,7 +46,7 @@ public:
     int* get_histogram (); // TODO
     void apply_lookup_tables (unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut); // TODO
 
-    void transform_image (point *new_corners);
+    void unified_transform (point *transform_matrix, int martix_size);
 private:
     point get_shift (int x, int y, point *shift);
 };

@@ -11,30 +11,19 @@ int main(int argc, char **argv)
     std::string input_filename = argv[1];
     std::string output_filename = argv[2];
     
-    image *photo;
-    // document doc;
+    image *photo = new image(input_filename);
 
-    bool read_photo_from_file = 1;
+    point matrix [4];
 
-    // recognize arguments
-    // print help
+    matrix[0] = {397, 357};
+    matrix[1] = {1805, 85};
+    matrix[2] = {394, 1376};
+    matrix[3] = {2012, 1192};
 
-    if (read_photo_from_file)
-        photo = new image(input_filename);
-    else
-        photo = take_photo();
+    photo->unified_transform (matrix, 4);
 
-    grayscale_image *bw_photo = new grayscale_image(photo);
-
-    bw_photo->canny_edge_detection();
-
-    delete photo;
-    photo = new image(bw_photo);
     photo->save(output_filename);
     delete photo;
-    // recognize document inside photo
-    // cut out and stretch document
-    // imporove visibility
 
     return 0;
 }

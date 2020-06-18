@@ -418,46 +418,50 @@ void grayscale_image::canny_edge_detection()
     delete[] gradient_value;
 }
 
-void image::transform_image(point *new_corners)
+void image::unified_transform(point *transform_matrix, int martix_size)
 {
     int xi, yi, ci;
     int new_width, new_height;
     int temp;
 
+    if (martix_size != 4)
+        return;
+
     // TODO: check order of points -> must be:
     // top-left, top-right, bottom-left, bottom-right
 
-    // find smaller dimensions
-    new_width = new_corners[1].x - new_corners[0].x;
-    temp = new_corners[3].x - new_corners[2].x;
+    // find new dimensions of output image
+    new_width = transform_matrix[1].x - transform_matrix[0].x;
+    temp = transform_matrix[3].x - transform_matrix[2].x;
 
     if (new_width > temp)
         new_width = temp;
 
-    new_height = new_corners[2].y - new_corners[0].y;
-    temp = new_corners[3].y - new_corners[1].y;
+    new_height = transform_matrix[2].y - transform_matrix[0].y;
+    temp = transform_matrix[3].y - transform_matrix[1].y;
 
     if (new_height > temp)
         new_height = temp;
+
 
     image *output = new image(new_width, new_height);
     point shift;
 
 
-    // proper transormation
-    for (yi = 0; yi < output->width; yi++)
+    // proper transformation
+    for (yi = 0; yi < output->height; yi++)
     {
-        for (xi = 0; xi < output->height; xi++)
+        for (xi = 0; xi < output->width; xi++)
         {
-            shift = output->get_shift (xi, yi, new_corners);
+            shift = output->get_shift (xi, yi, transform_matrix);
             
             for (ci = 0; ci < 3; ci++)            
-                output->set_pixel(xi, yi, ci, get_pixel(xi, yi, ci));
+                output->set_pixel(xi, yi, ci, get_pixel(shift.x, shift.y, ci));
         }
     }
 
 
-    // save output to this
+    // save output to "this*"
     width = output->width;
     height = output->height;
 
@@ -474,7 +478,14 @@ point image::get_shift (int x, int y, point *shift)
     point result;
 
     // horizontal
-    shift_on_top = shift[0].x * (width - x) + shift[1].x * x;
+    shift_on_top = (shift[0].x * (width - x) + shift[1].x * x) / width;
+    shift_on_bottom = (shift[2].x * (width - x) + shift[3].x * x) / width;
+    result.x = (shift_on_top * (height - y) + shift_on_bottom * y) / height;
 
+    // vertical
+    shift_on_top = (shift[0].y * (height - y) + shift[2].y * y) / height;
+    shift_on_bottom = (shift[1].y * (height - y) + shift[3].y * y) / height;
+    result.y = (shift_on_top * (width - x) + shift_on_bottom * x) / width;
 
+    return result;
 }
