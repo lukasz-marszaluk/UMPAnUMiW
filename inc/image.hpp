@@ -51,7 +51,7 @@ public:
     result last_result;
     int width;
     int height;
-private:
+public:
     unsigned char *data;
 
 public:

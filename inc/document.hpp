@@ -2,29 +2,20 @@
 #define _DOCUMENT_
 
 #include "image.hpp"
+#include "common.hpp"
 #include <vector>
 
 class detected_object
 {
-public:
-  int width;
-  int height;
-
 private:
-  unsigned char *data;
+  std::vector<point> data;
 
 public:
-  detected_object(int _width, int _height);
+  detected_object();
   ~detected_object();
 
-  void toggle_cell(int x, int y);
-  unsigned char read_cell(int x, int y);
-};
-
-struct point
-{
-  int x;
-  int y;
+  void add_cell(int x, int y);
+  bool read_cell(int x, int y);
 };
 
 class document
@@ -45,7 +36,8 @@ public:
   ~document();
 
 private:
-  detected_object *extract_document_outline(grayscale_image *image);
+  void separate_objects_from_image(grayscale_image *image, int *separated_image);
+  int find_biggest_object(int *separated_image);
 };
 
 #endif //_DOCUMENT_
