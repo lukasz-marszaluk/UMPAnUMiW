@@ -12,7 +12,9 @@
 
 #include <iostream>
 #include <cassert>
-#include <cmath>
+
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 image::image(int _width, int _height)
 {
@@ -220,7 +222,7 @@ grayscale_image::grayscale_image(grayscale_image *img)
         return;
 
     memcpy(data, img->data, width * height);
-    last_result = img->last_result;
+    last_result = OK;
 }
 
 grayscale_image::~grayscale_image()
@@ -381,6 +383,8 @@ void grayscale_image::canny_edge_detection()
         else
             gradient_value[i] = 127;
     }
+
+    memset(data, 0, width * height);
 
     // hysteresis with output save
     for (yi = 1; yi < height - 1; yi++)

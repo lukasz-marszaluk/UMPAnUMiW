@@ -8,8 +8,8 @@
 
 int main(int argc, char **argv)
 {
-    std::string input_filename = argv[1];
-    std::string output_filename = argv[2];
+    std::string input_filename = "./test/8.jpg";
+    std::string output_filename = "./test/output.bmp";
     
     image *photo = new image(input_filename);
     document *doc = new document(photo);

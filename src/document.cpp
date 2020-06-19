@@ -1,8 +1,9 @@
 #include "../inc/document.hpp"
+#include <cstring>
 
 document::document(image *_img)
 {
-  img = new image (_img);
+  img = new image(_img);
 }
 
 document::~document()
@@ -11,27 +12,18 @@ document::~document()
     delete img;
 }
 
-void document::recognize_document ()
+void document::recognize_document()
 {
   grayscale_image *bw_img;
-  std::vector<detected_object*> detected_objects;
   detected_object *document_outline;
 
   bw_img = new grayscale_image(img);
   bw_img->canny_edge_detection();
 
-  detected_objects = separate_objects_on_image (bw_img);
-  document_outline = find_biggest_object (detected_objects);
-
-  object_to_interior_contour (document_outline);
-  extract_document_corners (document_outline);
-
-  delete bw_img;
-
-  for (detected_object *obj : detected_objects)
-    delete obj;
+  document_outline = extract_document_outline(bw_img);
 
   delete document_outline;
+  delete bw_img;
 }
 
 image *document::get_document_image()
@@ -39,60 +31,87 @@ image *document::get_document_image()
   return img;
 }
 
-std::vector<detected_object *> document::separate_objects_on_image(grayscale_image *image)
+detected_object *document::extract_document_outline(grayscale_image *image)
 {
-  int xi, yi;
-  std::vector <detected_object *> objects;
+  detected_object *result = new detected_object(image->width, image->height);
 
+  int xi, yi;
+
+  //from top
+  for (xi = 0; xi < image->width; xi++)
+  {
+    for (yi = 0; yi < image->height; yi++)
+    {
+      if (image->get_pixel(xi, yi) == 255)
+      {
+        result->toggle_cell(xi, yi);
+        break;
+      }
+    }
+  }
+
+  //from bottom
+  for (xi = 0; xi < image->width; xi++)
+  {
+    for (yi = image->height - 1; yi >= 0; yi--)
+    {
+      if (image->get_pixel(xi, yi) == 255)
+      {
+        result->toggle_cell(xi, yi);
+        break;
+      }
+    }
+  }
+
+  //from left
   for (yi = 0; yi < image->height; yi++)
   {
     for (xi = 0; xi < image->width; xi++)
     {
-      if (image->get_pixel(xi, yi))
+      if (image->get_pixel(xi, yi) == 255)
       {
-        
+        result->toggle_cell(xi, yi);
+        break;
       }
-
     }
   }
-  
-  return objects;
+
+  //from right
+  for (yi = 0; yi < image->height; yi++)
+  {
+    for (xi = image->width - 1; xi >= 0; xi--)
+    {
+      if (image->get_pixel(xi, yi) == 255)
+      {
+        result->toggle_cell(xi, yi);
+        break;
+      }
+    }
+  }
+
+  return result;
 }
 
-detected_object* document::find_biggest_object (std::vector<detected_object*> objects)
+detected_object::detected_object(int _width, int _height)
 {
+  width = _width;
+  height = _height;
+  data = (unsigned char *)malloc(width * height);
 
+  memset(data, 0, width * height);
 }
 
-void document::object_to_interior_contour (detected_object *object)
+detected_object::~detected_object()
 {
-
+  free(data);
 }
 
-void document::extract_document_corners (detected_object *contours)
+void detected_object::toggle_cell(int x, int y)
 {
-
+  data[y * width + x] ^= 255;
 }
 
-void document::separate_object_on_image_recursive(detected_object *object, grayscale_image *image, int x, int y)
+unsigned char detected_object::read_cell(int x, int y)
 {
-  if (x < 0 || x >= image->width)
-    return;
-  if (y < 0 || y >= image->height)
-    return;
-
-  if (image->get_pixel(x, y) == 0)
-    return;
-
-  image->set_pixel (x, y, 0);
-  // set object value
-
-  separate_object_on_image_recursive (object, image, x - 1, y - 1);
-  separate_object_on_image_recursive (object, image, x, y - 1);
-  separate_object_on_image_recursive (object, image, x + 1, y - 1);
-  separate_object_on_image_recursive (object, image, x - 1, y);
-  separate_object_on_image_recursive (object, image, x + 1, y);
-  separate_object_on_image_recursive (object, image, x - 1, y + 1);
-  separate_object_on_image_recursive (object, image, x, y + 1);
-  separate_object_on_image_recursive (object, image, x + 1, y + 1);
+  return data[y * width + x];
 }
