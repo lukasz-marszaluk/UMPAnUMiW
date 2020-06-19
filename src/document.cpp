@@ -1,6 +1,7 @@
 #include "../inc/document.hpp"
 
 #include <cstring>
+#include <vector>
 
 document::document (image* _img)
 {
@@ -32,8 +33,8 @@ void document::recognize_document ()
 	{
 		for (xi = 0; xi < img->width; xi++)
 		{
-			//pixel = (unsigned char) (255 * (separated_image [yi * img->width + xi] == biggest_object_index));
-			pixel = (unsigned char) (separated_image [yi * img->width + xi] % 255);
+			pixel = (unsigned char) (255 * (separated_image [yi * img->width + xi] == biggest_object_index));
+			//pixel = (unsigned char) (separated_image [yi * img->width + xi] % 255);
 
 			img->set_pixel (xi, yi, pixel, pixel, pixel);
 		}
@@ -51,57 +52,61 @@ image* document::get_document_image ()
 void document::separate_objects_from_image (grayscale_image* image, int* separated_image)
 {
 	int last_object_index = 0;
-	int xi, yi, xii, yii, i;
+	int xi, yi, i;
 	bool break_loops;
 
 	for (i = 0; i < img->width * img->height; i++)
-		separated_image [i] = 0;
+		separated_image [i] = -1;
 
 	for (yi = 0; yi < image->height; yi++)
 	{
 		for (xi = 0; xi < image->width; xi++)
 		{
-			if (image->get_pixel (xi, yi) == 0)
+			if (image->get_pixel(xi, yi) == 0)
 				continue;
 
-			image->set_pixel (xi, yi, 0);
-
-			break_loops = false;
-
-			for (yii = -1; (yii <= 1 && !break_loops); yii++)
-			{
-				for (xii = -1; (xii <= 1 && !break_loops); xii++)
-				{
-					if ((xi + xii < 0) || (xi + xii >= image->width))
-						continue;
-
-					if ((yi + yii < 0) || (yi + yii >= image->height))
-						continue;
-
-					if (separated_image [(yi + yii) * image->width + (xi + xii)] == 0)
-						continue;
-
-					separated_image [yi * image->width + xi] =
-						separated_image [(yi + yii) * image->width + (xi + xii)];
-
-					break_loops = true;
-					break;
-				}
-			}
-
-			if (!break_loops)
-			{
-				last_object_index++;
-				
-				separated_image [yi * image->width + xi] = last_object_index;
-			}
-			
+			take_out_object(image, separated_image, last_object_index, xi, yi);
+			last_object_index++;
 		}
 	}
-
 }
 
-int document::find_biggest_object (int* separated_image)
+void document::take_out_object(grayscale_image *image, int *separated_image, int object_index, int x, int y)
+{
+	std::vector<point> object_queue;
+	point current_point;
+	int xi, yi;
+
+	object_queue.push_back({x, y});
+
+	while (object_queue.size() > 0)
+	{
+		current_point = object_queue.back();
+		x = current_point.x;
+		y = current_point.y;
+		object_queue.pop_back();
+
+		image->set_pixel(current_point.x, current_point.y, 0);
+		separated_image [current_point.y * image->width + current_point.x] = object_index;
+
+		for (yi = -3; yi <= 3; yi++)
+		{
+			for (xi = -3; xi <= 3; xi++)
+			{
+				if ((x + xi < 0) || (x + xi >= image->width))
+					continue;
+
+				if ((y + yi < 0) || (y + yi >= image->height))
+					continue;
+
+				if (image->get_pixel(x + xi, y + yi) == 255)
+					object_queue.push_back({x + xi, y + yi});
+			}
+		}
+	}
+}
+
+int document::find_biggest_object(int *separated_image)
 {
 	int xi, yi, i;
 	int number_of_objects = 0;
@@ -120,6 +125,8 @@ int document::find_biggest_object (int* separated_image)
 		}
 	}
 
+	number_of_objects++;
+
 	int* x_beg = new int [number_of_objects];
 	int* x_end = new int [number_of_objects];
 	int* y_beg = new int [number_of_objects];
@@ -137,7 +144,7 @@ int document::find_biggest_object (int* separated_image)
 	{
 		for (xi = 0; xi < img->width; xi++)
 		{
-			currently_checked_object = separated_image [yi * img->width + xi] - 1;
+			currently_checked_object = separated_image [yi * img->width + xi];
 
 			if (currently_checked_object == -1)
 				continue;
@@ -174,13 +181,5 @@ int document::find_biggest_object (int* separated_image)
 	delete [] y_beg;
 	delete [] y_end;
 
-	return biggest_object_index + 1;
+	return biggest_object_index;
 }
-
-unsigned int* find_biggest_object (unsigned int* separated_image);
-
-detected_object::detected_object ()
-{}
-
-detected_object::~detected_object ()
-{}

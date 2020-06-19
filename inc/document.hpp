@@ -3,20 +3,7 @@
 
 #include "image.hpp"
 #include "common.hpp"
-#include <vector>
 
-class detected_object
-{
-private:
-  std::vector<point> data;
-
-public:
-  detected_object();
-  ~detected_object();
-
-  void add_cell(int x, int y);
-  bool read_cell(int x, int y);
-};
 
 class document
 {
@@ -37,6 +24,7 @@ public:
 
 private:
   void separate_objects_from_image(grayscale_image *image, int *separated_image);
+  void take_out_object (grayscale_image *image, int *separated_image, int object_index, int x, int y);
   int find_biggest_object(int *separated_image);
 };
 
