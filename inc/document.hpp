@@ -13,7 +13,7 @@ private:
 
 public:
   void recognize_document();
-  void stretch_document(); // todo
+  void stretch_document();
   void improve_colors();   // todo
 
   image *get_document_image();

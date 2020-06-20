@@ -168,7 +168,7 @@ void image::save(std::string filename)
         last_result = STBI_ERROR;
 }
 
-int *image::get_histogram()
+int *image::get_histogram(int channel)
 {
     int yi, xi;
     int *histogram = new int[256];
@@ -178,7 +178,7 @@ int *image::get_histogram()
 
     for (yi = 0; yi < height; yi++)
         for (xi = 0; xi < width; xi++)
-            histogram[get_pixel(xi, yi)] += 1;
+            histogram[get_pixel(xi, yi, channel)] += 1;
 
     return histogram;
 }
@@ -423,9 +423,6 @@ void image::unified_transform(point *transform_matrix, int martix_size)
     if (martix_size != 4)
         return;
 
-    // TODO: check order of points -> must be:
-    // top-left, top-right, bottom-left, bottom-right
-
     // find new dimensions of output image
     new_width = transform_matrix[1].x - transform_matrix[0].x;
     temp = transform_matrix[3].x - transform_matrix[2].x;
@@ -439,23 +436,20 @@ void image::unified_transform(point *transform_matrix, int martix_size)
     if (new_height > temp)
         new_height = temp;
 
-
     image *output = new image(new_width, new_height);
     point shift;
-
 
     // proper transformation
     for (yi = 0; yi < output->height; yi++)
     {
         for (xi = 0; xi < output->width; xi++)
         {
-            shift = output->get_shift (xi, yi, transform_matrix);
-            
-            for (ci = 0; ci < 3; ci++)            
+            shift = output->get_shift(xi, yi, transform_matrix);
+
+            for (ci = 0; ci < 3; ci++)
                 output->set_pixel(xi, yi, ci, get_pixel(shift.x, shift.y, ci));
         }
     }
-
 
     // save output to "this*"
     width = output->width;
@@ -468,7 +462,7 @@ void image::unified_transform(point *transform_matrix, int martix_size)
     delete output;
 }
 
-point image::get_shift (int x, int y, point *shift)
+point image::get_shift(int x, int y, point *shift)
 {
     double shift_on_top, shift_on_bottom;
     point result;
@@ -486,7 +480,7 @@ point image::get_shift (int x, int y, point *shift)
     return result;
 }
 
-void image::apply_lookup_tables (unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut)
+void image::apply_lookup_tables(unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut)
 {
     int xi, yi;
 
@@ -501,40 +495,24 @@ void image::apply_lookup_tables (unsigned char *red_lut, unsigned char *green_lu
     }
 }
 
-int* image::get_histogram (int channel)
-{
-    int xi, yi;
-    int *histogram = new int [256];
-
-    memset (histogram, 0, 256 * sizeof(int));
-
-    for (yi = 0; yi < height; yi++)
-        for (xi = 0; xi < width; xi++)
-            histogram[get_pixel(xi, yi, channel)] += 1;
-
-    return histogram;
-}
-
-void image::remove_tint ()
+void image::remove_tint()
 {
     int i;
 
-    int *hist_red = get_histogram (0);
-    int *hist_green = get_histogram (1);
-    int *hist_blue = get_histogram (2);
+    int *hist_red = get_histogram(0);
+    int *hist_green = get_histogram(1);
+    int *hist_blue = get_histogram(2);
 
     int difference_red_green = 0;
     int difference_red_blue = 0;
 
-
     for (i = 0; i < 256; i++)
     {
-        difference_red_green += hist_red [i] - hist_green [i];
-        difference_red_blue += hist_red [i] - hist_blue [i];
+        difference_red_green += hist_red[i] - hist_green[i];
+        difference_red_blue += hist_red[i] - hist_blue[i];
     }
-    
 
-    delete [] hist_red;
-    delete [] hist_green;
-    delete [] hist_blue;
+    delete[] hist_red;
+    delete[] hist_green;
+    delete[] hist_blue;
 }

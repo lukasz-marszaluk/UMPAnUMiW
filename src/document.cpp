@@ -411,6 +411,20 @@ point document::resolve_equations(line *first_line, line *second_line)
 
 		return {x, y};
 	}
+	else if (second_line->slope == tan(-M_PI_2))
+	{
+		x = second_line->x;
+		y = x * first_line->slope + first_line->vertical_shift;
+
+		return {x, y};
+	}
+	else if (second_line->slope == 0.0)
+	{
+		y = second_line->y;
+		x = (double)(y - first_line->vertical_shift) / first_line->slope;
+
+		return {x, y};
+	}
 	else
 	{
 		x = (int((double)(second_line->vertical_shift - first_line->vertical_shift) / 
@@ -420,5 +434,9 @@ point document::resolve_equations(line *first_line, line *second_line)
 
 		return {x, y};
 	}
-	
+}
+
+void document::stretch_document()
+{
+	img->unified_transform(doc_corners, 4);
 }
