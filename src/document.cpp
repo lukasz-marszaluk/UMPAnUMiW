@@ -284,11 +284,10 @@ void document::exact_document_corners(int *separated_image)
 		find_best_line(separated_image, &(lines[i]));
 
 	// find crossing points
-	int temp = 0;
-	// doc_corners[0] = resolve_equations(&(lines[3]), &(lines[0]));
-	// doc_corners[1] = resolve_equations(&(lines[0]), &(lines[1]));
-	// doc_corners[2] = resolve_equations(&(lines[2]), &(lines[3]));
-	// doc_corners[1] = resolve_equations(&(lines[2]), &(lines[1]));
+	doc_corners[0] = resolve_equations(&(lines[3]), &(lines[0]));
+	doc_corners[1] = resolve_equations(&(lines[0]), &(lines[1]));
+	doc_corners[2] = resolve_equations(&(lines[2]), &(lines[3]));
+	doc_corners[3] = resolve_equations(&(lines[2]), &(lines[1]));
 }
 
 void document::find_best_line(int *separated_image, line *ln)
@@ -319,6 +318,8 @@ void document::find_best_line(int *separated_image, line *ln)
 	}
 
 	ln->slope = best_slope;
+	ln->vertical_shift = ln->y - ln->slope * ln->x;
+
 }
 
 int document::check_line_match(int *separated_image, line *ln)
@@ -384,4 +385,40 @@ int document::check_line_match(int *separated_image, line *ln)
 	}
 
 	return matching_points;
+}
+
+point document::resolve_equations(line *first_line, line *second_line)
+{
+	int x, y;
+	double w, w_x, w_y;
+	if (first_line->slope == 0.0)
+	{
+		if (second_line->slope == tan(-M_PI_2))
+			return {second_line->x, first_line->y};
+
+		y = first_line->y;
+		x = (double)(y - second_line->vertical_shift) / second_line->slope;
+
+		return {x, y};
+	}
+	else if (first_line->slope == tan(-M_PI_2))
+	{
+		if (second_line->slope == 0.0)
+			return {first_line->x, second_line->y};
+
+		x = first_line->x;
+		y = x * second_line->slope + second_line->vertical_shift;
+
+		return {x, y};
+	}
+	else
+	{
+		x = (int((double)(second_line->vertical_shift - first_line->vertical_shift) / 
+			(first_line->slope - second_line->slope) + 0.5));
+		
+		y = (int)(first_line->slope * x + first_line->vertical_shift);
+
+		return {x, y};
+	}
+	
 }
