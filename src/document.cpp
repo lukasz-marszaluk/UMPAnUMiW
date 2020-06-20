@@ -3,6 +3,9 @@
 #include <cstring>
 #include <vector>
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 document::document(image *_img)
 {
 	img = new image(_img);
@@ -235,7 +238,7 @@ void document::exact_document_corners(int *separated_image)
 	break_loops = false;
 	for (xi = center_x; (xi < img->width && !break_loops); xi++)
 	{
-	for (yi = center_y - radius; (yi < center_y + radius && !break_loops); yi++)
+		for (yi = center_y - radius; (yi < center_y + radius && !break_loops); yi++)
 		{
 			if (separated_image[yi * img->width + xi])
 			{
@@ -265,7 +268,7 @@ void document::exact_document_corners(int *separated_image)
 	break_loops = false;
 	for (xi = center_x; (xi >= 0 && !break_loops); xi--)
 	{
-	for (yi = center_y - radius; (yi < center_y + radius && !break_loops); yi++)
+		for (yi = center_y - radius; (yi < center_y + radius && !break_loops); yi++)
 		{
 			if (separated_image[yi * img->width + xi])
 			{
@@ -276,5 +279,42 @@ void document::exact_document_corners(int *separated_image)
 		}
 	}
 
+	// find best lines
+	for (i = 0; i < 4; i++)
+		find_best_line(separated_image, &(lines[0]));
 
+	// find crossing points
+	doc_corners[0] = resolve_equations(&(lines[3]), &(lines[0]));
+	doc_corners[1] = resolve_equations(&(lines[0]), &(lines[1]));
+	doc_corners[2] = resolve_equations(&(lines[2]), &(lines[3]));
+	doc_corners[1] = resolve_equations(&(lines[2]), &(lines[1]));
+}
+
+void document::find_best_line(int *separated_image, line *ln)
+{
+	double angle;
+	double slope;
+	int i;
+
+	double best_slope = 0.0;
+	int best_matching_index = 0;
+	int matching_index;
+
+	for (i = 0; i < 100; i++)
+	{
+		angle = M_PI * (i - 50) / 100;
+		slope = tan (angle);
+
+		ln->slope = slope;
+
+		matching_index = check_line_match (ln);
+
+		if (best_matching_index < matching_index)
+		{
+			best_matching_index = matching_index;
+			best_slope = ln->slope;
+		}
+	}
+	
+	ln->slope = best_slope;
 }

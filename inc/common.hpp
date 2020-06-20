@@ -9,7 +9,7 @@ struct point
 
 struct line
 {
-    double angle;
+    double slope;
     int x;
     int y;
 };
