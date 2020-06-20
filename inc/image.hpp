@@ -1,6 +1,8 @@
 #ifndef _IMAGE_
 #define _IMAGE_
 
+#include "common.hpp"
+
 #include <string>
 
 enum result
@@ -40,9 +42,13 @@ public:
 
     void save (std::string filename);
 
-    void threshold_image (unsigned char threshold);
-    int* get_histogram ();
+    int* get_histogram (int channel);
     void apply_lookup_tables (unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut);
+
+    void unified_transform (point *transform_matrix, int martix_size);
+    void remove_tint ();
+private:
+    point get_shift (int x, int y, point *shift);
 };
 
 class grayscale_image

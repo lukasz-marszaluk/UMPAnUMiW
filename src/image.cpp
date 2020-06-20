@@ -413,3 +413,128 @@ void grayscale_image::canny_edge_detection()
     delete[] gradient_direction;
     delete[] gradient_value;
 }
+
+void image::unified_transform(point *transform_matrix, int martix_size)
+{
+    int xi, yi, ci;
+    int new_width, new_height;
+    int temp;
+
+    if (martix_size != 4)
+        return;
+
+    // TODO: check order of points -> must be:
+    // top-left, top-right, bottom-left, bottom-right
+
+    // find new dimensions of output image
+    new_width = transform_matrix[1].x - transform_matrix[0].x;
+    temp = transform_matrix[3].x - transform_matrix[2].x;
+
+    if (new_width > temp)
+        new_width = temp;
+
+    new_height = transform_matrix[2].y - transform_matrix[0].y;
+    temp = transform_matrix[3].y - transform_matrix[1].y;
+
+    if (new_height > temp)
+        new_height = temp;
+
+
+    image *output = new image(new_width, new_height);
+    point shift;
+
+
+    // proper transformation
+    for (yi = 0; yi < output->height; yi++)
+    {
+        for (xi = 0; xi < output->width; xi++)
+        {
+            shift = output->get_shift (xi, yi, transform_matrix);
+            
+            for (ci = 0; ci < 3; ci++)            
+                output->set_pixel(xi, yi, ci, get_pixel(shift.x, shift.y, ci));
+        }
+    }
+
+
+    // save output to "this*"
+    width = output->width;
+    height = output->height;
+
+    stbi_image_free(data);
+    data = (unsigned char *)stbi__malloc(width * height * 3);
+    memcpy(data, output->data, width * height * 3);
+
+    delete output;
+}
+
+point image::get_shift (int x, int y, point *shift)
+{
+    double shift_on_top, shift_on_bottom;
+    point result;
+
+    // horizontal
+    shift_on_top = (shift[0].x * (width - x) + shift[1].x * x) / width;
+    shift_on_bottom = (shift[2].x * (width - x) + shift[3].x * x) / width;
+    result.x = (shift_on_top * (height - y) + shift_on_bottom * y) / height;
+
+    // vertical
+    shift_on_top = (shift[0].y * (height - y) + shift[2].y * y) / height;
+    shift_on_bottom = (shift[1].y * (height - y) + shift[3].y * y) / height;
+    result.y = (shift_on_top * (width - x) + shift_on_bottom * x) / width;
+
+    return result;
+}
+
+void image::apply_lookup_tables (unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut)
+{
+    int xi, yi;
+
+    for (yi = 0; yi < height; yi++)
+    {
+        for (xi = 0; xi < width; xi++)
+        {
+            set_pixel(xi, yi, 0, red_lut[get_pixel(xi, yi, 0)]);
+            set_pixel(xi, yi, 1, green_lut[get_pixel(xi, yi, 1)]);
+            set_pixel(xi, yi, 2, blue_lut[get_pixel(xi, yi, 2)]);
+        }
+    }
+}
+
+int* image::get_histogram (int channel)
+{
+    int xi, yi;
+    int *histogram = new int [256];
+
+    memset (histogram, 0, 256 * sizeof(int));
+
+    for (yi = 0; yi < height; yi++)
+        for (xi = 0; xi < width; xi++)
+            histogram[get_pixel(xi, yi, channel)] += 1;
+
+    return histogram;
+}
+
+void image::remove_tint ()
+{
+    int i;
+
+    int *hist_red = get_histogram (0);
+    int *hist_green = get_histogram (1);
+    int *hist_blue = get_histogram (2);
+
+    int difference_red_green = 0;
+    int difference_red_blue = 0;
+
+
+    for (i = 0; i < 256; i++)
+    {
+        difference_red_green += hist_red [i] - hist_green [i];
+        difference_red_blue += hist_red [i] - hist_blue [i];
+    }
+    
+
+    delete [] hist_red;
+    delete [] hist_green;
+    delete [] hist_blue;
+}
