@@ -10,6 +10,7 @@ struct point
 struct line
 {
     double slope;
+    int vertical_shift;
     int x;
     int y;
 };

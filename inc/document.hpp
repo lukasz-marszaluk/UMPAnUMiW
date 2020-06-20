@@ -28,7 +28,7 @@ private:
   void remove_atrefacts (int *separated_image);
   int find_biggest_object(int *separated_image);
   void find_best_line (int *separated_image, line *ln);
-  int check_line_match (line *ln);
+  int check_line_match (int *separated_image, line *ln);
   point resolve_equations (line *first_line, line *second_line);
 };
 

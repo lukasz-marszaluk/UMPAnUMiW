@@ -281,13 +281,14 @@ void document::exact_document_corners(int *separated_image)
 
 	// find best lines
 	for (i = 0; i < 4; i++)
-		find_best_line(separated_image, &(lines[0]));
+		find_best_line(separated_image, &(lines[i]));
 
 	// find crossing points
-	doc_corners[0] = resolve_equations(&(lines[3]), &(lines[0]));
-	doc_corners[1] = resolve_equations(&(lines[0]), &(lines[1]));
-	doc_corners[2] = resolve_equations(&(lines[2]), &(lines[3]));
-	doc_corners[1] = resolve_equations(&(lines[2]), &(lines[1]));
+	int temp = 0;
+	// doc_corners[0] = resolve_equations(&(lines[3]), &(lines[0]));
+	// doc_corners[1] = resolve_equations(&(lines[0]), &(lines[1]));
+	// doc_corners[2] = resolve_equations(&(lines[2]), &(lines[3]));
+	// doc_corners[1] = resolve_equations(&(lines[2]), &(lines[1]));
 }
 
 void document::find_best_line(int *separated_image, line *ln)
@@ -306,8 +307,9 @@ void document::find_best_line(int *separated_image, line *ln)
 		slope = tan (angle);
 
 		ln->slope = slope;
+		ln->vertical_shift = ln->y - ln->slope * ln->x;
 
-		matching_index = check_line_match (ln);
+		matching_index = check_line_match (separated_image, ln);
 
 		if (best_matching_index < matching_index)
 		{
@@ -315,6 +317,71 @@ void document::find_best_line(int *separated_image, line *ln)
 			best_slope = ln->slope;
 		}
 	}
-	
+
 	ln->slope = best_slope;
+}
+
+int document::check_line_match(int *separated_image, line *ln)
+{
+	int xi, yi;
+	int yi_beg, yi_end, xi_beg, xi_end;
+	int matching_points = 0;
+
+	if (ln->slope == 0.0)
+	{
+		yi_beg = ln->y - 8;
+		yi_end = ln->y + 8;
+
+		if (yi_beg < 0)
+			yi_beg = 0;
+
+		if (yi_end > img->height)
+			yi_end = img->height - 1;
+
+		for (yi = yi_beg; yi < yi_end; yi++)
+			for (xi = 0; xi < img->width; xi++)
+				if (separated_image[yi * img->width + xi])
+					matching_points++;
+
+		return matching_points;
+	}
+
+	if (ln->slope == tan(-M_PI_2))
+	{
+		xi_beg = ln->x - 8;
+		xi_end = ln->x + 8;
+
+		if (xi_beg < 0)
+			xi_beg = 0;
+
+		if (xi_end > img->width)
+			xi_end = img->width - 1;
+
+		for (yi = 0; yi < img->height; yi++)
+			for (xi = xi_beg; xi < xi_end; xi++)
+				if (separated_image[yi * img->width + xi])
+					matching_points++;
+
+		return matching_points;
+	}
+
+	for (xi = 0; xi < img->width; xi++)
+	{
+		yi = ln->slope * xi + ln->vertical_shift;
+
+		yi_beg = yi - 8;
+		yi_end = yi + 8;
+
+		if (yi_beg < 0)
+			yi_beg = 0;
+
+		if (yi_end > img->height)
+			yi_end = img->height - 1;
+
+		for (yi = yi_beg; yi < yi_end; yi++)
+			if (separated_image[yi * img->width + xi])
+				matching_points++;
+	}
+
+	return matching_points;
 }
