@@ -7,6 +7,13 @@ struct point
     int y;
 };
 
+struct line
+{
+    double angle;
+    int x;
+    int y;
+};
+
 // round angle to multiple of 45 degrees
 int round_angle_45 (double angle);
 
