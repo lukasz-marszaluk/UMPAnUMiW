@@ -4,7 +4,8 @@ image* take_photo ()
 {
 	system ("sudo raspistill -o photo.jpg -e");
 
-	image *photo = new image("photo.jpg");
+	std::string name = "photo.jpg";
+	image *photo = new image(name);
 
 	system("sudo rm photo.jpg");	
 
