@@ -28,13 +28,20 @@ void document::recognize_document()
 	bw_img = new grayscale_image(img);
 	bw_img->canny_edge_detection();
 
-	separate_objects_from_image(bw_img, separated_image);
-	biggest_object_index = find_biggest_object(separated_image);
+	if (bw_img->last_result == OK)
+	{
+		separate_objects_from_image(bw_img, separated_image);
+		biggest_object_index = find_biggest_object(separated_image);
 
-	for (i = 0; i < img->width * img->height; i++)
-		separated_image[i] = (separated_image[i] == biggest_object_index);
+		for (i = 0; i < img->width * img->height; i++)
+			separated_image[i] = (separated_image[i] == biggest_object_index);
 
-	exact_document_corners(separated_image);
+		exact_document_corners(separated_image);
+	}
+	else
+	{
+		img->last_result = UNDEFINED;
+	}
 
 	delete[] separated_image;
 	delete bw_img;
@@ -439,6 +446,9 @@ point document::resolve_equations(line *first_line, line *second_line)
 void document::stretch_document()
 {
 	int i;
+
+	if (img->last_result != OK)
+		return;
 
 	for (i = 0; i < 4; i++)
 	{

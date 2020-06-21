@@ -363,6 +363,16 @@ void grayscale_image::canny_edge_detection()
         }
     }
 
+    if (max_grad_value < 127)
+    {
+        delete[] gradient_direction;
+        delete[] gradient_value;
+        delete[] non_max_suppressed;
+        
+        last_result = UNDEFINED;
+        return;
+    }
+
     for (i = 0; i < width * height; i++)
         gradient_value[i] = gradient_value[i] * 255 / max_grad_value;
 
