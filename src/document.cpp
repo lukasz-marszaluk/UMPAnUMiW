@@ -303,12 +303,12 @@ void document::find_best_line(int *separated_image, line *ln)
 	for (i = 0; i < 100; i++)
 	{
 		angle = M_PI * (i - 50) / 100;
-		slope = tan (angle);
+		slope = tan(angle);
 
 		ln->slope = slope;
 		ln->vertical_shift = ln->y - ln->slope * ln->x;
 
-		matching_index = check_line_match (separated_image, ln);
+		matching_index = check_line_match(separated_image, ln);
 
 		if (best_matching_index < matching_index)
 		{
@@ -319,7 +319,6 @@ void document::find_best_line(int *separated_image, line *ln)
 
 	ln->slope = best_slope;
 	ln->vertical_shift = ln->y - ln->slope * ln->x;
-
 }
 
 int document::check_line_match(int *separated_image, line *ln)
@@ -427,9 +426,10 @@ point document::resolve_equations(line *first_line, line *second_line)
 	}
 	else
 	{
-		x = (int((double)(second_line->vertical_shift - first_line->vertical_shift) / 
-			(first_line->slope - second_line->slope) + 0.5));
-		
+		x = (int((double)(second_line->vertical_shift - first_line->vertical_shift) /
+								 (first_line->slope - second_line->slope) +
+						 0.5));
+
 		y = (int)(first_line->slope * x + first_line->vertical_shift);
 
 		return {x, y};
@@ -443,6 +443,12 @@ void document::stretch_document()
 
 void document::improve_colors()
 {
+	improve_contrast();
+	remove_tint();
+}
+
+void document::improve_contrast()
+{
 	int i;
 	// improve contrast
 	unsigned char contrast_lut[256];
@@ -450,7 +456,7 @@ void document::improve_colors()
 	int contrast_begin, contrast_end;
 
 	int *value_histogram = img->get_histogram();
-	
+
 	maximum = 0;
 
 	for (i = 0; i < 256; i++)
@@ -464,7 +470,7 @@ void document::improve_colors()
 	contrast_begin = 0;
 	for (i = 0; i < 256; i++)
 	{
-		if (value_histogram [i] > threshold)
+		if (value_histogram[i] > threshold)
 		{
 			contrast_begin = i;
 			break;
@@ -474,7 +480,7 @@ void document::improve_colors()
 	contrast_end = 0;
 	for (i = 255; i >= 0; i--)
 	{
-		if (value_histogram [i] > threshold)
+		if (value_histogram[i] > threshold)
 		{
 			contrast_end = i;
 			break;
@@ -484,16 +490,19 @@ void document::improve_colors()
 	contrast_begin /= 2; // to save more whites
 
 	for (i = 0; i < contrast_begin; i++)
-		contrast_lut [i] = 0;
+		contrast_lut[i] = 0;
 
 	for (i = contrast_begin; i < contrast_end; i++)
-		contrast_lut [i] = 255 * (i - contrast_begin) / (contrast_end - contrast_begin);
-		
+		contrast_lut[i] = 255 * (i - contrast_begin) / (contrast_end - contrast_begin);
+
 	for (i = contrast_end; i < 256; i++)
-		contrast_lut [i] = 255;
-	
+		contrast_lut[i] = 255;
 
 	img->apply_lookup_tables(contrast_lut, contrast_lut, contrast_lut);
 
 	delete[] value_histogram;
+}
+
+void document::remove_tint()
+{
 }
