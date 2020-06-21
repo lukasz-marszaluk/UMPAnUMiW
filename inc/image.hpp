@@ -11,7 +11,8 @@ enum result
     STBI_ERROR,
     MALLOC_FAULT,
     UNDEFINED,
-    UNSUPPORTED_FORMAT
+    UNSUPPORTED_FORMAT,
+    UNIFIED_TRANSFORM_ERROR
 };
 
 class grayscale_image;

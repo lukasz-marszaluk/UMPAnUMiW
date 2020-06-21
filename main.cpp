@@ -56,10 +56,17 @@ int main(int argc, char **argv)
         doc->stretch_document();
     }
 
-    if (!input_params.disable_color_correction)
-        doc->improve_colors();
+    if (doc->get_document_image()->last_result == OK)
+    {
+        if (!input_params.disable_color_correction)
+            doc->improve_colors();
 
-    doc->get_document_image()->save(input_params.output_file);
+        doc->get_document_image()->save(input_params.output_file);
+    }
+    else
+    {
+        print_message ("Document not found.\n");
+    }
 
     if (input_params.read_photo_from_file)
         delete photo;

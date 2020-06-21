@@ -470,6 +470,12 @@ void image::unified_transform(point *transform_matrix, int martix_size)
     if (new_height > temp)
         new_height = temp;
 
+    if (new_width < 1 || new_width > width || new_height < 1 || new_height > height)
+    {
+        last_result = UNIFIED_TRANSFORM_ERROR;
+        return;
+    }
+
     image *output = new image(new_width, new_height);
     point_double shift;
 
@@ -480,9 +486,6 @@ void image::unified_transform(point *transform_matrix, int martix_size)
         {
             shift = output->get_shift(xi, yi, transform_matrix);
             output->transform_pixel(this, shift, xi, yi);
-
-            //for (ci = 0; ci < 3; ci++)
-            //   output->set_pixel(xi, yi, ci, get_pixel((int)shift.x, (int)shift.y, ci));
         }
     }
 

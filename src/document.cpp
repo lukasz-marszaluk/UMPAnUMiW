@@ -438,6 +438,23 @@ point document::resolve_equations(line *first_line, line *second_line)
 
 void document::stretch_document()
 {
+	int i;
+
+	for (i = 0; i < 4; i++)
+	{
+		if (doc_corners[i].x < 0)
+			doc_corners[i].x = 1;
+
+		if (doc_corners[i].x - 2 > img->width)
+			doc_corners[i].x = img->width - 2;
+
+		if (doc_corners[i].y < 0)
+			doc_corners[i].y = 1;
+
+		if (doc_corners[i].y - 2 > img->height)
+			doc_corners[i].y = img->height - 2;
+	}
+
 	img->unified_transform(doc_corners, 4);
 }
 
