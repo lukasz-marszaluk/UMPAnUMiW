@@ -31,6 +31,8 @@ private:
   point resolve_equations (line *first_line, line *second_line);
   void improve_contrast ();
   void remove_tint ();
+  bool document_is_bw ();
+  int calculate_std_dev_between_channels (int *histogram_a, int * histogram_b);
 };
 
 #endif //_DOCUMENT_

@@ -444,7 +444,9 @@ void document::stretch_document()
 void document::improve_colors()
 {
 	improve_contrast();
-	remove_tint();
+
+	if (document_is_bw())
+		remove_tint();
 }
 
 void document::improve_contrast()
@@ -465,7 +467,7 @@ void document::improve_contrast()
 			maximum = value_histogram[i];
 	}
 
-	threshold = maximum / 50; // 2% of maximum number of pixels for brightness
+	threshold = maximum / 20; // 2% of maximum number of pixels for brightness
 
 	contrast_begin = 0;
 	for (i = 0; i < 256; i++)
@@ -505,4 +507,97 @@ void document::improve_contrast()
 
 void document::remove_tint()
 {
+	int i, value;
+	int sum_diff_red_green = 0;
+	int sum_diff_red_blue = 0;
+	int avg_diff_red_green = 0;
+	int avg_diff_red_blue = 0;
+
+	unsigned char *lut_red = new unsigned char[256];
+	unsigned char *lut_green = new unsigned char[256];
+	unsigned char *lut_blue = new unsigned char[256];
+
+	int *histogram_red = img->get_histogram(0);
+	int *histogram_green = img->get_histogram(1);
+	int *histogram_blue = img->get_histogram(2);
+
+	for (i = 0; i < 256; i++)
+	{
+		sum_diff_red_green += histogram_red[i] - histogram_green[i];
+		sum_diff_red_blue += histogram_red[i] - histogram_blue[i];
+	}
+
+	avg_diff_red_green = (sum_diff_red_green + 127) / 256;
+	avg_diff_red_blue = (sum_diff_red_blue + 127) / 256;
+
+	for (i = 0; i < 256; i++)
+	{
+		lut_red[i] = i;
+
+		value = i - avg_diff_red_green;
+		if (value > 255)
+			value = 255;
+		if (value < 0)
+			value = 0;
+
+		lut_green[i] = value;
+
+		value = i - avg_diff_red_blue;
+		if (value > 255)
+			value = 255;
+		if (value < 0)
+			value = 0;
+
+		lut_blue[i] = value;
+	}
+
+	img->apply_lookup_tables(lut_red, lut_green, lut_blue);
+
+	delete[] histogram_red;
+	delete[] histogram_green;
+	delete[] histogram_blue;
+
+	delete[] lut_red;
+	delete[] lut_green;
+	delete[] lut_blue;
+}
+
+bool document::document_is_bw()
+{
+	int *histogram_red = img->get_histogram(0);
+	int *histogram_green = img->get_histogram(1);
+	int *histogram_blue = img->get_histogram(2);
+
+	int std_dev_red_green =
+			calculate_std_dev_between_channels(histogram_red, histogram_green);
+
+	int std_dev_red_blue =
+			calculate_std_dev_between_channels(histogram_red, histogram_blue);
+
+	delete[] histogram_red;
+	delete[] histogram_green;
+	delete[] histogram_blue;
+
+	return (std_dev_red_blue < 5 && std_dev_red_green < 5);
+}
+
+int document::calculate_std_dev_between_channels(int *histogram_a, int *histogram_b)
+{
+	int i;
+
+	int sum_diff_a_b;
+	int avg_diff_a_b;
+	int std_dev_a_b;
+
+	sum_diff_a_b = 0;
+	for (i = 0; i < 256; i++)
+		sum_diff_a_b += histogram_a[i] - histogram_b[i];
+
+	avg_diff_a_b = (sum_diff_a_b + 127) / 256;
+
+	std_dev_a_b = 0;
+	for (i = 0; i < 256; i++)
+		std_dev_a_b += pow((histogram_a[i] - histogram_b[i] - avg_diff_a_b), 2);
+
+	return sqrt((std_dev_a_b + 127) / 256);
 }

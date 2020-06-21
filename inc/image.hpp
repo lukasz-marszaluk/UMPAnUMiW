@@ -48,7 +48,6 @@ public:
     void apply_lookup_tables (unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut);
 
     void unified_transform (point *transform_matrix, int martix_size);
-    void remove_tint ();
 private:
     point_double get_shift (int x, int y, point *shift);
     void transform_pixel (image *src, point_double shift, int dest_x, int dest_y);
