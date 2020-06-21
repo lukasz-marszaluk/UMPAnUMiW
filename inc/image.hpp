@@ -37,6 +37,7 @@ public:
     unsigned char get_pixel(int x, int y);
     unsigned char get_pixel(int index);
 
+    void set_pixel(int index, unsigned char value);
     void set_pixel(int x, int y, int c, unsigned char value);
     void set_pixel(int x, int y, unsigned char r, unsigned char b, unsigned char g);
 
@@ -49,7 +50,8 @@ public:
     void unified_transform (point *transform_matrix, int martix_size);
     void remove_tint ();
 private:
-    point get_shift (int x, int y, point *shift);
+    point_double get_shift (int x, int y, point *shift);
+    void transform_pixel (image *src, point_double shift, int dest_x, int dest_y);
 };
 
 class grayscale_image

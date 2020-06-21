@@ -7,6 +7,12 @@ struct point
     int y;
 };
 
+struct point_double
+{
+    double x;
+    double y;
+};
+
 struct line
 {
     double slope;

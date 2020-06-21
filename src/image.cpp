@@ -131,6 +131,11 @@ unsigned char image::get_pixel(int index)
     return data[index];
 }
 
+void image::set_pixel(int index, unsigned char value)
+{
+    data[index] = value;
+}
+
 void image::set_pixel(int x, int y, int c, unsigned char value)
 {
     data[(y * width + x) * 3 + c] = value;
@@ -301,6 +306,7 @@ void grayscale_image::gaussian_blur()
 
     delete temp_img;
 }
+
 void grayscale_image::canny_edge_detection()
 {
     int xi, yi, xii, yii, i;
@@ -466,7 +472,7 @@ void image::unified_transform(point *transform_matrix, int martix_size)
         new_height = temp;
 
     image *output = new image(new_width, new_height);
-    point shift;
+    point_double shift;
 
     // proper transformation
     for (yi = 0; yi < output->height; yi++)
@@ -474,9 +480,10 @@ void image::unified_transform(point *transform_matrix, int martix_size)
         for (xi = 0; xi < output->width; xi++)
         {
             shift = output->get_shift(xi, yi, transform_matrix);
+            output->transform_pixel (this, shift, xi, yi);
 
-            for (ci = 0; ci < 3; ci++)
-                output->set_pixel(xi, yi, ci, get_pixel(shift.x, shift.y, ci));
+            //for (ci = 0; ci < 3; ci++)
+            //   output->set_pixel(xi, yi, ci, get_pixel((int)shift.x, (int)shift.y, ci));
         }
     }
 
@@ -491,22 +498,54 @@ void image::unified_transform(point *transform_matrix, int martix_size)
     delete output;
 }
 
-point image::get_shift(int x, int y, point *shift)
+point_double image::get_shift(int x, int y, point *shift)
 {
     double shift_on_top, shift_on_bottom;
-    point result;
+    point_double result;
 
     // horizontal
-    shift_on_top = (shift[0].x * (width - x) + shift[1].x * x) / width;
-    shift_on_bottom = (shift[2].x * (width - x) + shift[3].x * x) / width;
+    shift_on_top = (double)(shift[0].x * (width - x) + shift[1].x * x) / width;
+    shift_on_bottom = (double)(shift[2].x * (width - x) + shift[3].x * x) / width;
     result.x = (shift_on_top * (height - y) + shift_on_bottom * y) / height;
 
     // vertical
-    shift_on_top = (shift[0].y * (height - y) + shift[2].y * y) / height;
-    shift_on_bottom = (shift[1].y * (height - y) + shift[3].y * y) / height;
+    shift_on_top = (double)(shift[0].y * (height - y) + shift[2].y * y) / height;
+    shift_on_bottom = (double)(shift[1].y * (height - y) + shift[3].y * y) / height;
     result.y = (shift_on_top * (width - x) + shift_on_bottom * x) / width;
 
     return result;
+}
+
+void image::transform_pixel (image *src, point_double shift, int dest_x, int dest_y)
+{
+    double fraction_x, fraction_y;
+    double pixel;
+    double weight [4];
+    int index [4];
+    int ci, pi;
+
+    fraction_x = shift.x - (int)shift.x;
+    fraction_y = shift.y - (int)shift.y;
+
+    weight [0] = (1.0 - fraction_x) * (1.0 - fraction_y);
+    weight [1] = fraction_x * (1.0 - fraction_y);
+    weight [2] = (1.0 - fraction_x) * fraction_y;
+    weight [3] = fraction_x * fraction_y;
+
+    index [0] = ((int)shift.y * src->width + (int)shift.x) * 3;
+    index [1] = index [0] + 1 * 3;
+    index [2] = index [0] + src->width * 3;
+    index [3] = index [2] + 1 * 3;
+
+    for (ci = 0; ci < 3; ci++)
+    {
+        pixel = 0.0;
+        
+        for (pi = 0; pi < 4; pi++)
+            pixel += weight [pi] * src->get_pixel(index [pi] + ci);
+
+        set_pixel(dest_x, dest_y, ci, (unsigned char)pixel);
+    }    
 }
 
 void image::apply_lookup_tables(unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut)
