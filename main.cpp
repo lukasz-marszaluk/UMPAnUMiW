@@ -15,14 +15,15 @@ int main(int argc, char **argv)
 
     input_params = read_arguments(argc, argv);
 
-    if (input_params.print_help)
-        print_help(argv[0]);
 
     if (input_params.error)
     {
         print_help(argv[0]);
         return -1;
     }
+
+    if (input_params.print_help)
+        print_help(argv[0]);
 
     if (input_params.read_photo_from_file)
     {
