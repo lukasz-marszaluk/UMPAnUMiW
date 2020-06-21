@@ -14,7 +14,7 @@ private:
 public:
   void recognize_document();
   void stretch_document();
-  void improve_colors();   // todo
+  void improve_colors();
 
   image *get_document_image();
 

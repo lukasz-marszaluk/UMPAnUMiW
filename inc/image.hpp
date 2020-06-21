@@ -43,6 +43,7 @@ public:
     void save (std::string filename);
 
     int* get_histogram (int channel);
+    int* get_histogram ();
     void apply_lookup_tables (unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut);
 
     void unified_transform (point *transform_matrix, int martix_size);

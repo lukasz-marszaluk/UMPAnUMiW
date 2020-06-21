@@ -440,3 +440,60 @@ void document::stretch_document()
 {
 	img->unified_transform(doc_corners, 4);
 }
+
+void document::improve_colors()
+{
+	int i;
+	// improve contrast
+	unsigned char contrast_lut[256];
+	int maximum, threshold;
+	int contrast_begin, contrast_end;
+
+	int *value_histogram = img->get_histogram();
+	
+	maximum = 0;
+
+	for (i = 0; i < 256; i++)
+	{
+		if (maximum < value_histogram[i])
+			maximum = value_histogram[i];
+	}
+
+	threshold = maximum / 50; // 2% of maximum number of pixels for brightness
+
+	contrast_begin = 0;
+	for (i = 0; i < 256; i++)
+	{
+		if (value_histogram [i] > threshold)
+		{
+			contrast_begin = i;
+			break;
+		}
+	}
+
+	contrast_end = 0;
+	for (i = 255; i >= 0; i--)
+	{
+		if (value_histogram [i] > threshold)
+		{
+			contrast_end = i;
+			break;
+		}
+	}
+
+	contrast_begin /= 2; // to save more whites
+
+	for (i = 0; i < contrast_begin; i++)
+		contrast_lut [i] = 0;
+
+	for (i = contrast_begin; i < contrast_end; i++)
+		contrast_lut [i] = 255 * (i - contrast_begin) / (contrast_end - contrast_begin);
+		
+	for (i = contrast_end; i < 256; i++)
+		contrast_lut [i] = 255;
+	
+
+	img->apply_lookup_tables(contrast_lut, contrast_lut, contrast_lut);
+
+	delete[] value_histogram;
+}

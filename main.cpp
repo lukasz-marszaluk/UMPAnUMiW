@@ -16,6 +16,7 @@ int main(int argc, char **argv)
 
     doc->recognize_document();
     doc->stretch_document();
+    doc->improve_colors();
 
     delete photo;
     photo = doc->get_document_image();

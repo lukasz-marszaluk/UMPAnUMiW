@@ -183,6 +183,21 @@ int *image::get_histogram(int channel)
     return histogram;
 }
 
+int *image::get_histogram()
+{
+    int yi, xi;
+    int *histogram = new int[256];
+
+    for (int i = 0; i < 256; i++)
+        histogram[i] = 0;
+
+    for (yi = 0; yi < height; yi++)
+        for (xi = 0; xi < width; xi++)
+            histogram[get_pixel(xi, yi)] += 1;
+
+    return histogram;
+}
+
 grayscale_image::grayscale_image(image *img)
 {
     last_result = UNDEFINED;
@@ -520,11 +535,9 @@ void image::remove_tint()
     int difference_red_green = 0;
     int difference_red_blue = 0;
 
-    for (i = 0; i < 256; i++)
-    {
-        difference_red_green += hist_red[i] - hist_green[i];
-        difference_red_blue += hist_red[i] - hist_blue[i];
-    }
+
+
+
 
     delete[] hist_red;
     delete[] hist_green;
