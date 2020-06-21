@@ -1,4 +1,5 @@
 #include "api/camera_api.hpp"
+#include "inc/io.hpp"
 
 #include "inc/image.hpp"
 #include "inc/document.hpp"
@@ -8,20 +9,49 @@
 
 int main(int argc, char **argv)
 {
-    std::string input_filename = argv[1];
-    std::string output_filename = argv[2];
+    params input_params;
+    image *photo;
+    document *doc;
     
-    image *photo = new image(input_filename);
-    document *doc = new document(photo);
+    
+    input_params = read_arguments (argc, argv);
 
-    doc->recognize_document();
-    doc->stretch_document();
-    doc->improve_colors();
+    if (input_params.print_help)
+        print_help(argv[0]);
 
-    delete photo;
-    photo = doc->get_document_image();
-    photo->save(output_filename);
-    delete photo;
+    if (input_params.error)
+    {
+        print_help(argv[0]);
+        return -1;
+    }
 
+    if (input_params.read_photo_from_file)
+        photo = new image(input_params.input_file);
+    else
+        photo = take_photo();
+    
+    if (input_params.save_preview)
+        photo->save ("./preview.jpg");
+
+    doc = new document(photo);
+
+    if (!input_params.disable_cutting_out_document)
+    {
+        doc->recognize_document();
+        doc->stretch_document();
+    }
+    
+    if (!input_params.disable_color_correction)
+        doc->improve_colors();
+
+    doc->get_document_image()->save(input_params.output_file);
+    
+    if (input_params.read_photo_from_file)
+        delete photo;
+    else
+        delete_photo (photo);
+    
+
+    print_message("Done\n");
     return 0;
 }

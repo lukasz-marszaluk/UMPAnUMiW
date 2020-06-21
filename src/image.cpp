@@ -365,7 +365,6 @@ void grayscale_image::canny_edge_detection()
 
     for (i = 0; i < width * height; i++)
         gradient_value[i] = gradient_value[i] * 255 / max_grad_value;
-    
 
     // non_max suppression
     for (yi = 1; yi < height - 1; yi++)
@@ -480,7 +479,7 @@ void image::unified_transform(point *transform_matrix, int martix_size)
         for (xi = 0; xi < output->width; xi++)
         {
             shift = output->get_shift(xi, yi, transform_matrix);
-            output->transform_pixel (this, shift, xi, yi);
+            output->transform_pixel(this, shift, xi, yi);
 
             //for (ci = 0; ci < 3; ci++)
             //   output->set_pixel(xi, yi, ci, get_pixel((int)shift.x, (int)shift.y, ci));
@@ -516,36 +515,36 @@ point_double image::get_shift(int x, int y, point *shift)
     return result;
 }
 
-void image::transform_pixel (image *src, point_double shift, int dest_x, int dest_y)
+void image::transform_pixel(image *src, point_double shift, int dest_x, int dest_y)
 {
     double fraction_x, fraction_y;
     double pixel;
-    double weight [4];
-    int index [4];
+    double weight[4];
+    int index[4];
     int ci, pi;
 
     fraction_x = shift.x - (int)shift.x;
     fraction_y = shift.y - (int)shift.y;
 
-    weight [0] = (1.0 - fraction_x) * (1.0 - fraction_y);
-    weight [1] = fraction_x * (1.0 - fraction_y);
-    weight [2] = (1.0 - fraction_x) * fraction_y;
-    weight [3] = fraction_x * fraction_y;
+    weight[0] = (1.0 - fraction_x) * (1.0 - fraction_y);
+    weight[1] = fraction_x * (1.0 - fraction_y);
+    weight[2] = (1.0 - fraction_x) * fraction_y;
+    weight[3] = fraction_x * fraction_y;
 
-    index [0] = ((int)shift.y * src->width + (int)shift.x) * 3;
-    index [1] = index [0] + 1 * 3;
-    index [2] = index [0] + src->width * 3;
-    index [3] = index [2] + 1 * 3;
+    index[0] = ((int)shift.y * src->width + (int)shift.x) * 3;
+    index[1] = index[0] + 1 * 3;
+    index[2] = index[0] + src->width * 3;
+    index[3] = index[2] + 1 * 3;
 
     for (ci = 0; ci < 3; ci++)
     {
         pixel = 0.0;
-        
+
         for (pi = 0; pi < 4; pi++)
-            pixel += weight [pi] * src->get_pixel(index [pi] + ci);
+            pixel += weight[pi] * src->get_pixel(index[pi] + ci);
 
         set_pixel(dest_x, dest_y, ci, (unsigned char)pixel);
-    }    
+    }
 }
 
 void image::apply_lookup_tables(unsigned char *red_lut, unsigned char *green_lut, unsigned char *blue_lut)
@@ -561,24 +560,4 @@ void image::apply_lookup_tables(unsigned char *red_lut, unsigned char *green_lut
             set_pixel(xi, yi, 2, blue_lut[get_pixel(xi, yi, 2)]);
         }
     }
-}
-
-void image::remove_tint()
-{
-    int i;
-
-    int *hist_red = get_histogram(0);
-    int *hist_green = get_histogram(1);
-    int *hist_blue = get_histogram(2);
-
-    int difference_red_green = 0;
-    int difference_red_blue = 0;
-
-
-
-
-
-    delete[] hist_red;
-    delete[] hist_green;
-    delete[] hist_blue;
 }
