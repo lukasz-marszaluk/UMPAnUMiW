@@ -297,11 +297,13 @@ void grayscale_image::canny_edge_detection()
     int grad_x, grad_y;
     int *gradient_value = new int[width * height];
     int *gradient_direction = new int[width * height];
+    int *non_max_suppressed = new int[width * height];
     int max_grad_value = 0;
     int pixel;
 
-    memset(gradient_value, 0, sizeof(int));
-    memset(gradient_direction, 0, sizeof(int));
+    memset(gradient_value, 0, sizeof(int) * width * height);
+    memset(gradient_direction, 0, sizeof(int) * width * height);
+    memset(non_max_suppressed, 0, sizeof(int) * width * height);
 
     int convolution_mask_x[] = {
         -1, 0, 1,
@@ -342,6 +344,7 @@ void grayscale_image::canny_edge_detection()
 
     for (i = 0; i < width * height; i++)
         gradient_value[i] = gradient_value[i] * 255 / max_grad_value;
+    
 
     // non_max suppression
     for (yi = 1; yi < height - 1; yi++)
@@ -352,23 +355,33 @@ void grayscale_image::canny_edge_detection()
             {
             case 0:
                 if (gradient_value[yi * width + xi] < gradient_value[yi * width + xi + 1] || gradient_value[yi * width + xi] < gradient_value[yi * width + xi - 1])
-                    gradient_value[yi * width + xi] = 0;
+                    non_max_suppressed[yi * width + xi] = 0;
+                else
+                    non_max_suppressed[yi * width + xi] = gradient_value[yi * width + xi];
                 break;
             case 45:
                 if (gradient_value[yi * width + xi] < gradient_value[(yi + 1) * width + xi - 1] || gradient_value[yi * width + xi] < gradient_value[(yi - 1) * width + xi + 1])
-                    gradient_value[yi * width + xi] = 0;
+                    non_max_suppressed[yi * width + xi] = 0;
+                else
+                    non_max_suppressed[yi * width + xi] = gradient_value[yi * width + xi];
                 break;
             case 90:
                 if (gradient_value[yi * width + xi] < gradient_value[(yi + 1) * width + xi] || gradient_value[yi * width + xi] < gradient_value[(yi - 1) * width + xi])
-                    gradient_value[yi * width + xi] = 0;
+                    non_max_suppressed[yi * width + xi] = 0;
+                else
+                    non_max_suppressed[yi * width + xi] = gradient_value[yi * width + xi];
                 break;
             case 135:
                 if (gradient_value[yi * width + xi] < gradient_value[(yi - 1) * width + xi + -1] || gradient_value[yi * width + xi] < gradient_value[(yi + 1) * width + xi + 1])
-                    gradient_value[yi * width + xi] = 0;
+                    non_max_suppressed[yi * width + xi] = 0;
+                else
+                    non_max_suppressed[yi * width + xi] = gradient_value[yi * width + xi];
                 break;
             }
         }
     }
+
+    memcpy(gradient_value, non_max_suppressed, width * height * sizeof(int));
 
     // double threshold
     int higher_threshold = max_grad_value / 10;
@@ -412,6 +425,7 @@ void grayscale_image::canny_edge_detection()
 
     delete[] gradient_direction;
     delete[] gradient_value;
+    delete[] non_max_suppressed;
 }
 
 void image::unified_transform(point *transform_matrix, int martix_size)

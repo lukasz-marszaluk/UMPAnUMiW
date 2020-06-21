@@ -330,8 +330,8 @@ int document::check_line_match(int *separated_image, line *ln)
 
 	if (ln->slope == 0.0)
 	{
-		yi_beg = ln->y - 8;
-		yi_end = ln->y + 8;
+		yi_beg = ln->y - 2;
+		yi_end = ln->y + 2;
 
 		if (yi_beg < 0)
 			yi_beg = 0;
@@ -349,8 +349,8 @@ int document::check_line_match(int *separated_image, line *ln)
 
 	if (ln->slope == tan(-M_PI_2))
 	{
-		xi_beg = ln->x - 8;
-		xi_end = ln->x + 8;
+		xi_beg = ln->x - 2;
+		xi_end = ln->x + 2;
 
 		if (xi_beg < 0)
 			xi_beg = 0;
@@ -370,8 +370,8 @@ int document::check_line_match(int *separated_image, line *ln)
 	{
 		yi = ln->slope * xi + ln->vertical_shift;
 
-		yi_beg = yi - 8;
-		yi_end = yi + 8;
+		yi_beg = yi - 2;
+		yi_end = yi + 2;
 
 		if (yi_beg < 0)
 			yi_beg = 0;
